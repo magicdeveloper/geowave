@@ -1,0 +1,63 @@
+
+bash /home/hadoopuser/Downloads/SourceData/abdalglil/bash/ingestrockDB.sh \
+-s RiyadhX1 \
+-d /home/hadoopuser/Downloads/SourceData/shabak12-7-2020Data \
+-p /home/hadoopuser/datastores
+# Install GDAL
+geowave raster installgdal
+
+cd /home/hadoopuser/Downloads/SourceData
+# Configure GeoWave Data Stores
+
+
+########################################
+
+
+geowave store add -t rocksdb --gwNamespace geowave.Riyadh --dir . --enableServerSideLibrary true shabak2 
+geowave index add -t spatial -c EPSG:4326 shabak2   shabak2-idx
+geowave store list
+geowave store describe shabak
+
+geowave ingest localToGW  ~/Downloads/SourceData/newdata shabak  shabak-idx \
+--geotools-raster.coverage Riyadh \
+--geotools-raster.histogram \
+--geotools-raster.pyramid \
+--geotools-raster.mergeStrategy no-data \
+ 
+
+
+geowave stat recalc  shabak
+geowave gs layer add shabak  --add vector 
+geowave gs layer add shabak  --add raster --setStyle raster
+
+geowave gs layer add shabak  --add all 
+
+geowave store describe shabak
+
+geowave store copy shabak shabak2
+
+geowave gs ds add -ds shabak shabak
+
+# Remove 
+geowave store list
+geowave index rm shabak2   shabak2-idx 
+geowave store clear shabak2
+geowave store rm shabak2  
+geowave store list
+
+# Remove 
+geowave gs cs add -cs xxx $StoreName \
+-histo true \
+-interp 0 \
+-scale false 
+
+
+sudo chown -R hadoopuser 
+export GEOSERVER_HOME=/opt/geoserver
+
+
+
+geowave index rm RiyadhX4 RiyadhX4-idx
+geowave store clear RiyadhX4
+geowave store rm RiyadhX4
+geowave store list RiyadhX4
